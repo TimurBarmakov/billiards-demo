@@ -2,16 +2,17 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Ball } from './models/Ball';
 import { updateGame } from './gameLogic';
 
+const initialBalls = [
+  new Ball(100, 300, 35, '#000000', 0, 0, 1),
+  new Ball(200, 300, 35, '#ffffff', 0, 0, 1),
+  new Ball(300, 300, 45, '#ffffff', 0, 0, 1),
+  new Ball(420, 300, 55, '#ffffff', 0, 0, 1),
+  new Ball(570, 300, 65, '#ffffff', 0, 0, 1),
+  new Ball(730, 300, 75, '#ffffff', 0, 0, 1),
+];
+
 export const PoolCanvas: React.FC<{ onBallSelect: (ball: Ball | null) => void }> = ({ onBallSelect }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const [balls, setBalls] = useState<Ball[]>([
-    new Ball(100, 300, 35, '#000000', 0, 0, 1),
-    new Ball(200, 300, 35, '#ffffff', 0, 0, 1),
-    new Ball(300, 300, 45, '#ffffff', 0, 0, 1),
-    new Ball(420, 300, 55, '#ffffff', 0, 0, 1),
-    new Ball(570, 300, 65, '#ffffff', 0, 0, 1),
-    new Ball(730, 300, 75, '#ffffff', 0, 0, 1),
-  ]);
   const [isDragging, setIsDragging] = useState(false);
   const dragStart = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const selectedBall = useRef<Ball | null>(null);
@@ -38,15 +39,15 @@ export const PoolCanvas: React.FC<{ onBallSelect: (ball: Ball | null) => void }>
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      updateGame(balls, canvas.width, canvas.height);
+      updateGame(initialBalls, canvas.width, canvas.height); 
       ctx.fillStyle = '#418539';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
-      balls.forEach(ball => ball.draw(ctx));
+      initialBalls.forEach(ball => ball.draw(ctx));
       
       requestAnimationFrame(animate);
     };
     requestAnimationFrame(animate);
-  }, [balls]);
+  }, []);
 
   const handleMouseDown = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -60,7 +61,7 @@ export const PoolCanvas: React.FC<{ onBallSelect: (ball: Ball | null) => void }>
     dragStart.current = { x, y };
     setIsDragging(true);
   
-    const clickedBall = balls.find(ball =>
+    const clickedBall = initialBalls.find(ball =>
       Math.sqrt((ball.x - x) ** 2 + (ball.y - y) ** 2) < ball.radius
     );
     if (!clickedBall) {
@@ -70,7 +71,7 @@ export const PoolCanvas: React.FC<{ onBallSelect: (ball: Ball | null) => void }>
     }
   
     selectedBall.current = clickedBall || null;
-  }, [balls, onBallSelect]);
+  }, [onBallSelect]);
 
   const handleMouseUp = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDragging || !selectedBall.current) return;
